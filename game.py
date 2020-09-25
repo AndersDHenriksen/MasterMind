@@ -4,7 +4,7 @@ import bot
 n_pins = 5
 n_guess = 10
 
-use_bot = False
+use_bot = True
 
 master_answer = [random.randint(1, 8) for _ in range(n_pins)]
 # print(master_answer)
@@ -69,9 +69,9 @@ def game_loop():
         print_board(guesses, answers, fully_correct_guess)
         player.update_possible(guess, answers[-1])
     if fully_correct_guess:
-        print(f"Congrats, you won in {len(guesses)} guesses!")
+        print(f"\nCongrats, you won in {len(guesses)} guesses!")
     else:
-        print(f"Failure! Answer was: {strl(master_answer)}")
+        print(f"\nFailure! Answer was: {strl(master_answer)}")
     return len(guesses)
 
 
