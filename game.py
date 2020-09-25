@@ -1,10 +1,17 @@
 import random
+import bot
 
 n_pins = 5
 n_guess = 10
 
-master_answer = [str(random.randint(1, 8)) for i in range(n_pins)]
+use_bot = False
+
+master_answer = [random.randint(1, 8) for _ in range(n_pins)]
 # print(master_answer)
+
+
+def strl(int_list):
+    return " ".join(str(i) for i in int_list)
 
 
 def print_row(array, correct_count):
@@ -13,12 +20,12 @@ def print_row(array, correct_count):
     print(f"│ {char_array} │ {pin_array} │")
 
 
-def print_line(type):
+def print_line(kind):
     ends = {"start": "┌┐", "middle": "├┤", "end": "└┘"}
     middle = {"start": "┬", "middle": "┼", "end": "┴"}
-    assert type in ends.keys()
-    middle_segment = 11 * "─" + middle[type] + 7 * "─"
-    print(str(middle_segment).join(ends[type]))
+    assert kind in ends.keys()
+    middle_segment = 11 * "─" + middle[kind] + 7 * "─"
+    print(str(middle_segment).join(ends[kind]))
 
 
 def print_board(guesses, answers, reveal=False):
@@ -33,9 +40,9 @@ def print_board(guesses, answers, reveal=False):
     print_line("end")
 
 
-def compare_guess(guess):
+def compare_guess(guess, answer=None):
+    answer = master_answer.copy() if answer is None else list(answer)
     guess = list(guess)
-    answer = master_answer.copy()
     n_correct, n_present = 0, 0
     for i in reversed(range(n_pins)):
         if guess[i] == answer[i]:
@@ -51,24 +58,27 @@ def compare_guess(guess):
 
 
 def game_loop():
+    player = bot.BruteForcePlayer() if use_bot else bot.HumanPlayer()
     guesses, answers = [], []
     fully_correct_guess = False
-    while not (fully_correct_guess or len(guesses) >= 10):
-        guess = ''
-        while len(guess) != 5:
-            guess = input("Guess: ")
-            guess = guess.replace(" ", "")
-        print("")
+    while not (fully_correct_guess or len(guesses) >= n_guess):
+        guess = player.guess()
         guesses.append(guess)
         answers.append(compare_guess(guess))
-        fully_correct_guess = answers[-1][0] == 5
+        fully_correct_guess = answers[-1][0] == n_pins
         print_board(guesses, answers, fully_correct_guess)
+        player.update_possible(guess, answers[-1])
     if fully_correct_guess:
-        print("Congrats!")
+        print(f"Congrats, you won in {len(guesses)} guesses!")
     else:
-        print(f"Failure! Answer was: {master_answer}")
+        print(f"Failure! Answer was: {strl(master_answer)}")
+    return len(guesses)
 
 
 if __name__ == '__main__':
+    # needed_guesses = 100 * [None]
+    # for i in range(100):
+    #     needed_guesses[i] = game_loop()
+    # print(f"Average number of guesses required: {sum(needed_guesses)/len(needed_guesses)}")
     game_loop()
 
